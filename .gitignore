@@ -23,6 +23,7 @@ web-build
 # Next
 apps/web/.next
 apps/web/out
+.vercel
 
 # Env
 .env

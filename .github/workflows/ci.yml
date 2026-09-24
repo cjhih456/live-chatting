@@ -35,3 +35,33 @@ jobs:
         run: pnpm build:web
         env:
           NEXT_PUBLIC_API_ORIGIN: http://127.0.0.1:4010
+
+  deploy:
+    needs: quality
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+      - name: Pull Vercel environment
+        working-directory: apps/web
+        run: vercel pull --yes --environment=${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build for Vercel
+        working-directory: apps/web
+        run: vercel build ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Vercel
+        working-directory: apps/web
+        run: vercel deploy --prebuilt ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}

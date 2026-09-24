@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test
+      - name: Integration tests
+        run: pnpm test:integration
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Playwright e2e
+        run: pnpm e2e:web
+      - name: Build web
+        run: pnpm build:web
+        env:
+          NEXT_PUBLIC_API_ORIGIN: 
+
+  deploy:
+    needs: quality
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+      - name: Pull Vercel environment
+        working-directory: apps/web
+        run: vercel pull --yes --environment=${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build for Vercel
+        working-directory: apps/web
+        env:
+          IS_PRODUCTION: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && 'true' || 'false' }}
+          NEXT_PUBLIC_DATA_SOURCE: ${{ secrets.NEXT_PUBLIC_DATA_SOURCE }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_DATA_SOURCE: ${{ secrets.EXPO_PUBLIC_DATA_SOURCE }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+        run: |
+          if [ "$IS_PRODUCTION" = "true" ]; then
+            ENV_FILE=".vercel/.env.production.local"
+            touch "$ENV_FILE"
+            for key in \
+              NEXT_PUBLIC_DATA_SOURCE \
+              NEXT_PUBLIC_SUPABASE_ANON_KEY \
+              NEXT_PUBLIC_SUPABASE_URL \
+              EXPO_PUBLIC_DATA_SOURCE \
+              EXPO_PUBLIC_SUPABASE_ANON_KEY \
+              EXPO_PUBLIC_SUPABASE_URL
+            do
+              value="${!key}"
+              if [ -n "$value" ]; then
+                grep -v "^${key}=" "$ENV_FILE" > "${ENV_FILE}.tmp" || true
+                mv "${ENV_FILE}.tmp" "$ENV_FILE"
+                printf '%s=%s\n' "$key" "$value" >> "$ENV_FILE"
+              fi
+            done
+          fi
+          vercel build ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        working-directory: apps/web
+        run: vercel deploy --prebuilt ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+
+

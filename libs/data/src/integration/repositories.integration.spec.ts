@@ -27,6 +27,9 @@ describe('data repositories against OpenAPI MSW', () => {
 
   it('logs in with OAuth and design example profile', async () => {
     const session = await authRepository.oauthLogin({ provider: 'google' });
+    if (!('profile' in session)) {
+      throw new Error('expected auth session from the mock API');
+    }
     expect(session.profile.name).toBe('최인환');
     expect(session.profile.email).toBe('inhwan@lumen.app');
   });

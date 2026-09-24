@@ -40,3 +40,9 @@ apps/web/out
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Build / test artifacts
+*.tsbuildinfo
+apps/web/test-results/
+apps/web/playwright-report/
+apps/app/artifacts/

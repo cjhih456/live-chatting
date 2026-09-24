@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useOAuthLoginMutation } from '@lumen/data';
+import { getSupabaseClient, useOAuthLoginMutation, useSupabaseDataSource } from '@lumen/data';
 import { Text, View, Button } from '@lumen/ui';
 import { useI18n } from '@lumen/i18n';
 import type { OAuthProvider } from '@lumen/structure';
@@ -45,10 +45,31 @@ export default function LoginPage() {
   const router = useRouter();
   const { t } = useI18n();
   const [formError, setFormError] = useState<string | null>(null);
+  const supabaseAuth = useSupabaseDataSource();
   const mutation = useOAuthLoginMutation({
-    onSuccess: () => router.push('/chats'),
+    onSuccess: () => {
+      if (!supabaseAuth) {
+        router.push('/chats');
+      }
+    },
     onError: (error) => setFormError(error.message),
   });
+
+  useEffect(() => {
+    if (!supabaseAuth) {
+      return;
+    }
+    const client = getSupabaseClient();
+    if (!client) {
+      return;
+    }
+    const { data } = client.auth.onAuthStateChange((event, session) => {
+      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        void router.replace('/chats');
+      }
+    });
+    return () => data.subscription.unsubscribe();
+  }, [router, supabaseAuth]);
 
   const signIn = (provider: OAuthProvider) => {
     mutation.mutate({ provider });

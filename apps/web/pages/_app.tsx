@@ -2,6 +2,7 @@ import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { getSupabaseClient } from '@lumen/data';
 import { ThemeProvider } from '@lumen/ui';
 import { I18nProvider } from '@lumen/i18n';
 import '../styles/globals.css';
@@ -16,6 +17,10 @@ function makeClient() {
 
 export default function App({ Component, pageProps }: AppProps) {
   const [client] = useState(makeClient);
+
+  useEffect(() => {
+    getSupabaseClient();
+  }, []);
 
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') {

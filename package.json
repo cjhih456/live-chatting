@@ -1,13 +1,52 @@
 {
-  "name": "@lumen-tmp/source",
+  "name": "@lumen/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
   "private": true,
-  "dependencies": {},
+  "scripts": {
+    "lint": "nx run-many -t lint",
+    "typecheck": "nx run-many -t typecheck",
+    "test": "nx run-many -t test",
+    "test:integration": "nx run data:test-integration",
+    "build:web": "nx build web",
+    "dev:web": "nx serve web",
+    "dev:app": "nx start app",
+    "e2e:web": "playwright test --config apps/web/playwright.config.ts",
+    "e2e:app": "detox test --configuration ios.sim.debug --cwd apps/app"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.69.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
   "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-typescript": "^7.26.0",
+    "@nx/eslint": "23.2.1",
+    "@nx/jest": "23.2.1",
     "@nx/js": "23.2.1",
+    "@nx/next": "23.2.1",
+    "@nx/react": "23.2.1",
     "@nx/workspace": "23.2.1",
-    "nx": "23.2.1"
+    "@playwright/test": "^1.51.0",
+    "@tailwindcss/postcss": "^4.1.4",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.10",
+    "@types/react": "~19.1.0",
+    "@types/react-dom": "~19.1.0",
+    "babel-jest": "^29.7.0",
+    "detox": "^20.36.0",
+    "eslint": "^9.22.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "msw": "^2.7.3",
+    "nx": "23.2.1",
+    "postcss": "^8.5.3",
+    "prettier": "^3.5.3",
+    "tailwindcss": "^4.1.4",
+    "ts-jest": "^29.2.6",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.8.2"
   }
 }

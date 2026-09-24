@@ -93,7 +93,7 @@ function Thread({ conversationId }: { conversationId: string }) {
 
 export default function ChatsPage() {
   const [filter, setFilter] = useState<ConversationFilter>('all');
-  const [selectedId, setSelectedId] = useState<string | null>('conv-1');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
     <Shell active="chats">

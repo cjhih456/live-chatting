@@ -64,7 +64,11 @@ function ChatContent({ conversationId }: { conversationId: string }) {
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const conversationId = id ?? 'conv-1';
+  const conversationId = id
+  console.log(conversationId)
+  if(!conversationId) {
+    return <div></div>
+  }
 
   return (
     <ErrorBoundary

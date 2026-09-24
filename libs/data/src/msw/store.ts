@@ -108,7 +108,7 @@ function buildInitialState(): StoreState {
   const messagesByConversation: Record<string, Message[]> = {};
 
   if (messagesExample?.items?.length) {
-    const conversationId = messagesExample.items[0]?.conversationId ?? 'conv-1';
+    const conversationId = messagesExample.items[0]?.conversationId ?? null;
     messagesByConversation[conversationId] = clone(messagesExample.items);
   }
 

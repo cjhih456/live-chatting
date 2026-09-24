@@ -25,6 +25,7 @@ export default defineConfig({
       timeout: 30_000,
       env: {
         ...process.env,
+        CI: '',
         NEXT_PUBLIC_API_ORIGIN: mockOrigin,
         EXPO_PUBLIC_API_ORIGIN: mockOrigin,
         NEXT_PUBLIC_DATA_SOURCE: 'mock',

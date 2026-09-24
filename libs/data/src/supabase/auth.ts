@@ -5,7 +5,7 @@ export type { OAuthProvider };
 
 export async function signInWithOAuth(
   provider: OAuthProvider,
-  redirectTo: string,
+  redirectTo?: string,
 ) {
   const client = getSupabaseClient();
   if (!client) {

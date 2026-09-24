@@ -27,11 +27,15 @@ import {
   supabaseProfileRepository,
   supabaseSettingsRepository,
 } from './supabase/repositories';
+import { signInWithOAuth } from './supabase/auth';
 
 export { getSupabaseClient, isSupabaseConfigured, useSupabaseDataSource } from './supabase/client';
 
 export const authRepository = {
   async oauthLogin(input: OAuthLoginInput) {
+    if (useSupabaseDataSource()) {
+      return signInWithOAuth(input.provider);
+    }
     const body = oauthLoginSchema.parse(input);
     const data = await api.post('auth/oauth', { json: body }).json();
     return authSessionSchema.parse(data);

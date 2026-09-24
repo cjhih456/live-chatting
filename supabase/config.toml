@@ -1,0 +1,20 @@
+# Lumen local Supabase — OAuth provider placeholders (no secrets in repo).
+# Fill client_id / secret via env or `supabase secrets` before enabling.
+
+project_id = "lumen-live-chat"
+
+[auth.external.google]
+enabled = false
+client_id = ""
+secret = ""
+
+[auth.external.apple]
+enabled = false
+client_id = ""
+secret = ""
+
+# Kakao: configure when using a compatible external/OIDC provider in your project.
+[auth.external.kakao]
+enabled = false
+client_id = ""
+secret = ""

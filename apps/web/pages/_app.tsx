@@ -24,6 +24,10 @@ export default function App({ Component, pageProps }: AppProps) {
 
     let cancelled = false;
 
+    if (sessionStorage.getItem('lumen-msw-browser') === 'off') {
+      return;
+    }
+
     void (async () => {
       try {
         const { startBrowserWorker } = await import('@lumen/data/msw/browser');

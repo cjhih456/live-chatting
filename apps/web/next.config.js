@@ -20,6 +20,9 @@ const nextConfig = {
     '@lumen/i18n',
     'lucide-react-native',
   ],
+  experimental: {
+    forceSwcTransforms: true,
+  },
   webpack: (config) => {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),

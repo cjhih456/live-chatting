@@ -14,6 +14,7 @@
     "@lumen/i18n": "workspace:*",
     "@lumen/structure": "workspace:*",
     "@lumen/ui": "workspace:*",
+    "@swc/helpers": "^0.5.23",
     "@tanstack/react-query": "^5.69.0",
     "expo": "~54.0.0",
     "nativewind": "preview",

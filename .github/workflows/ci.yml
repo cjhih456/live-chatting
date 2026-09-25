@@ -53,11 +53,9 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel
       - name: Pull Vercel environment
-        working-directory: apps/web
-        run: vercel pull --yes --environment=${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
 
       - name: Build for Vercel
-        working-directory: apps/web
         env:
           IS_PRODUCTION: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && 'true' || 'false' }}
           NEXT_PUBLIC_DATA_SOURCE: ${{ secrets.NEXT_PUBLIC_DATA_SOURCE }}
@@ -86,10 +84,9 @@ jobs:
               fi
             done
           fi
-          vercel build ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
 
       - name: Deploy to Vercel
-        working-directory: apps/web
-        run: vercel deploy --prebuilt ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
 
 

@@ -3,6 +3,17 @@
   "version": "0.0.0",
   "license": "MIT",
   "private": true,
+  "packageManager": "pnpm@11.28.0",
+  "engines": {
+    "pnpm": ">=11 <12"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.28.0",
+      "onFail": "download"
+    }
+  },
   "scripts": {
     "lint": "nx run-many -t lint",
     "typecheck": "nx run-many -t typecheck",

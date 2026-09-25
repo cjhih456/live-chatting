@@ -1,6 +1,7 @@
 packages:
   - 'apps/*'
   - 'libs/*'
+engineStrict: true
 autoInstallPeers: true
 allowBuilds:
   nx: true

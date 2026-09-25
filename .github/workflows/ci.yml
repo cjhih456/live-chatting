@@ -58,67 +58,8 @@ jobs:
         run: npm install -g vercel
       - name: Pull Vercel environment
         working-directory: apps/web
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_TARGET: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && 'production' || 'preview' }}
-        run: |
-          set -euo pipefail
-          mkdir -p .vercel
-          cleanup() { rm -f .vercel/project-response.json .vercel/env-response.json; }
-          trap cleanup EXIT
-          curl -fsS \
-            -H "Authorization: Bearer ${VERCEL_TOKEN}" \
-            "https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}?teamId=${VERCEL_ORG_ID}" \
-            -o .vercel/project-response.json
-          curl -fsS \
-            -H "Authorization: Bearer ${VERCEL_TOKEN}" \
-            "https://api.vercel.com/v3/env/pull/${VERCEL_PROJECT_ID}/${VERCEL_TARGET}?teamId=${VERCEL_ORG_ID}" \
-            -o .vercel/env-response.json
-          python3 - <<'PY'
-          import json
-          import os
-
-          with open(".vercel/project-response.json", encoding="utf-8") as handle:
-              project = json.load(handle)
-          with open(".vercel/env-response.json", encoding="utf-8") as handle:
-              raw_env = handle.read()
-          try:
-              parsed = json.loads(raw_env)
-          except json.JSONDecodeError:
-              parsed = None
-          if isinstance(parsed, dict) and isinstance(parsed.get("env"), str):
-              env_text = parsed["env"]
-          elif parsed is None:
-              env_text = raw_env
-          else:
-              raise SystemExit("Unexpected Vercel env pull response")
-          if env_text and not env_text.endswith("\n"):
-              env_text += "\n"
-
-          link = {
-              "projectId": project["id"],
-              "orgId": os.environ["VERCEL_ORG_ID"],
-              "projectName": project["name"],
-              "settings": {
-                  "createdAt": project.get("createdAt"),
-                  "framework": project.get("framework"),
-                  "devCommand": project.get("devCommand"),
-                  "installCommand": project.get("installCommand"),
-                  "buildCommand": project.get("buildCommand"),
-                  "outputDirectory": project.get("outputDirectory"),
-                  "rootDirectory": project.get("rootDirectory"),
-                  "directoryListing": project.get("directoryListing"),
-                  "nodeVersion": project.get("nodeVersion"),
-              },
-          }
-          target = os.environ["VERCEL_TARGET"]
-          with open(".vercel/project.json", "w", encoding="utf-8") as handle:
-              json.dump(link, handle, indent=2)
-              handle.write("\n")
-          with open(f".vercel/.env.{target}.local", "w", encoding="utf-8") as handle:
-              handle.write(env_text)
-          print(f"Wrote .vercel/project.json and .vercel/.env.{target}.local")
-          PY
+        run: vercel pull --yes --environment=${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+        
       - name: Build for Vercel
         working-directory: apps/web
         env:

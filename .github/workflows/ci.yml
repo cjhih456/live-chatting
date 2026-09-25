@@ -87,6 +87,6 @@ jobs:
           vercel build ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
 
       - name: Deploy to Vercel
-        run: vercel deploy --prebuilt ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }} --cwd /home/runner/work/live-chatting/live-chatting/apps/web
+        run: vercel deploy --prebuilt ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }} --cwd /home/runner/work/live-chatting/live-chatting
 
 

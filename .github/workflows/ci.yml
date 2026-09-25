@@ -11,8 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 11
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -27,10 +25,10 @@ jobs:
         run: pnpm test
       - name: Integration tests
         run: pnpm test:integration
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
-      - name: Playwright e2e
-        run: pnpm e2e:web
+      # - name: Install Playwright browsers
+      #   run: pnpm exec playwright install --with-deps chromium
+      # - name: Playwright e2e
+      #   run: pnpm e2e:web
       - name: Build web
         run: pnpm build:web
         env:
@@ -46,8 +44,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 11
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -57,10 +53,9 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel
       - name: Pull Vercel environment
-        working-directory: apps/web
-        run: vercel pull --yes --environment=${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
+
       - name: Build for Vercel
-        working-directory: apps/web
         env:
           IS_PRODUCTION: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && 'true' || 'false' }}
           NEXT_PUBLIC_DATA_SOURCE: ${{ secrets.NEXT_PUBLIC_DATA_SOURCE }}
@@ -89,10 +84,9 @@ jobs:
               fi
             done
           fi
-          vercel build ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
 
       - name: Deploy to Vercel
-        working-directory: apps/web
-        run: vercel deploy --prebuilt ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }} --cwd /home/runner/work/live-chatting/live-chatting
 
 

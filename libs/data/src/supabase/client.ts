@@ -16,8 +16,7 @@ function readSupabaseEnv() {
 
 let cachedClient: SupabaseClient | null | undefined;
 
-/** Implicit flow is browser-only. Native keeps the PKCE default. */
-function useImplicitFlow(): boolean {
+function isBrowser(): boolean {
   return typeof document !== 'undefined';
 }
 
@@ -28,13 +27,12 @@ export function getSupabaseClient(): SupabaseClient | null {
     return null;
   }
   if (cachedClient === undefined) {
-    const implicit = useImplicitFlow();
     cachedClient = createClient(url, anonKey, {
       auth: {
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: implicit,
-        flowType: implicit ? 'implicit' : 'pkce',
+        detectSessionInUrl: isBrowser(),
+        flowType: 'pkce',
       },
     });
   }

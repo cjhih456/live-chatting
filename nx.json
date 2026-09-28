@@ -14,7 +14,20 @@
   "targetDefaults": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["production", "^production"],
+      "inputs": ["production", "^production",
+        {
+          "env": "NEXT_PUBLIC_API_ORIGIN"
+        },
+        {
+          "env": "NEXT_PUBLIC_DATA_SOURCE"
+        },
+        {
+          "env": "NEXT_PUBLIC_SUPABASE_URL"
+        },
+        {
+          "env": "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+        }
+      ],
       "cache": true
     },
     "lint": {

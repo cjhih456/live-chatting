@@ -1,4 +1,4 @@
-import { setupWorker } from 'msw/browser';
+import { SetupWorker, setupWorker } from 'msw/browser';
 import { createHandlers } from './handlers';
 
 export async function startBrowserWorker() {
@@ -11,4 +11,8 @@ export async function startBrowserWorker() {
     },
   });
   return worker;
+}
+
+export async function stopBrowserWorker(worker: SetupWorker) {
+  await worker.stop();
 }

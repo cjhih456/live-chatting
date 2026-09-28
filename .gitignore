@@ -1,45 +1,49 @@
-# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
-
-# compiled output
-dist
-tmp
-out-tsc
-
-# dependencies
+# Dependencies
 node_modules
+.pnpm-store
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
-/typings
-
-# System Files
-.DS_Store
-Thumbs.db
-
+# Nx
 .nx/cache
 .nx/workspace-data
-.nx/migrate-runs
-.claude/worktrees
-.claude/settings.local.json
+dist
+tmp
+coverage
+
+# Expo
+apps/app/.expo
+apps/app/dist
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build
+
+# Next
+apps/web/.next
+apps/web/out
+.vercel
+
+# Env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE / OS
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build / test artifacts
+*.tsbuildinfo
+apps/web/test-results/
+apps/web/playwright-report/
+apps/app/artifacts/

@@ -1,0 +1,39 @@
+{
+  "name": "data",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/data/src",
+  "projectType": "library",
+  "tags": ["type:data"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/data/tsconfig.json --noEmit"
+      }
+    },
+    "test-integration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "NODE_OPTIONS=--experimental-vm-modules jest --config libs/data/jest.config.ts --testPathPattern=integration --passWithNoTests",
+        "env": {
+          "NEXT_PUBLIC_API_ORIGIN": "http://127.0.0.1:4010",
+          "EXPO_PUBLIC_API_ORIGIN": "http://127.0.0.1:4010",
+          "NEXT_PUBLIC_DATA_SOURCE": "mock",
+          "EXPO_PUBLIC_DATA_SOURCE": "mock"
+        }
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "NODE_OPTIONS=--experimental-vm-modules jest --config libs/data/jest.config.ts --testPathIgnorePatterns=integration --passWithNoTests"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo lint data ok"
+      }
+    }
+  }
+}

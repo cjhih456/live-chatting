@@ -1,0 +1,579 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Lumen Mock API",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:4010"
+    }
+  ],
+  "paths": {
+    "/auth/oauth": {
+      "post": {
+        "operationId": "oauthLogin",
+        "summary": "OAuth 로그인",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["provider"],
+                "properties": {
+                  "provider": {
+                    "type": "string",
+                    "enum": ["google", "apple", "kakao"]
+                  }
+                }
+              },
+              "example": {
+                "provider": "google"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "세션",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthSession"
+                },
+                "example": {
+                  "token": "mock-token-inhwan",
+                  "profile": {
+                    "id": "user-inhwan",
+                    "name": "최인환",
+                    "email": "inhwan@lumen.app",
+                    "bio": "Lumen에서 대화해요",
+                    "avatarUrl": null
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile": {
+      "get": {
+        "operationId": "getProfile",
+        "summary": "내 프로필",
+        "responses": {
+          "200": {
+            "description": "프로필",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                },
+                "example": {
+                  "id": "user-inhwan",
+                  "name": "최인환",
+                  "email": "inhwan@lumen.app",
+                  "bio": "Lumen에서 대화해요",
+                  "avatarUrl": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateProfile",
+        "summary": "프로필 저장",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "bio": { "type": "string" }
+                }
+              },
+              "example": {
+                "name": "최인환",
+                "bio": "Lumen에서 대화해요"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "저장된 프로필",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                },
+                "example": {
+                  "id": "user-inhwan",
+                  "name": "최인환",
+                  "email": "inhwan@lumen.app",
+                  "bio": "Lumen에서 대화해요",
+                  "avatarUrl": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations": {
+      "get": {
+        "operationId": "listConversations",
+        "summary": "채팅 목록",
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["all", "unread", "group"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "대화 목록",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationList"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "conv-1",
+                      "title": "김서연",
+                      "preview": "내일 회의 자료 보냈어요",
+                      "updatedAt": "2026-09-24T08:00:00.000Z",
+                      "unreadCount": 2,
+                      "isGroup": false,
+                      "avatarUrl": null
+                    },
+                    {
+                      "id": "conv-2",
+                      "title": "디자인 팀",
+                      "preview": "토큰 이름 맞췄어요",
+                      "updatedAt": "2026-09-24T07:30:00.000Z",
+                      "unreadCount": 0,
+                      "isGroup": true,
+                      "avatarUrl": null
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{conversationId}/messages": {
+      "get": {
+        "operationId": "listMessages",
+        "summary": "대화 메시지",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "메시지 목록",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageList"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "msg-1",
+                      "conversationId": "conv-1",
+                      "senderId": "user-seoyeon",
+                      "body": "내일 회의 자료 보냈어요",
+                      "createdAt": "2026-09-24T08:00:00.000Z"
+                    },
+                    {
+                      "id": "msg-2",
+                      "conversationId": "conv-1",
+                      "senderId": "user-inhwan",
+                      "body": "확인했어요. 감사합니다!",
+                      "createdAt": "2026-09-24T08:05:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "sendMessage",
+        "summary": "메시지 전송",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["body"],
+                "properties": {
+                  "body": { "type": "string" }
+                }
+              },
+              "example": {
+                "body": "안녕하세요"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "전송된 메시지",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                },
+                "example": {
+                  "id": "msg-new",
+                  "conversationId": "conv-1",
+                  "senderId": "user-inhwan",
+                  "body": "안녕하세요",
+                  "createdAt": "2026-09-24T09:00:00.000Z"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{conversationId}/messages/fail": {
+      "post": {
+        "operationId": "sendMessageFail",
+        "summary": "메시지 전송 실패 예시",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["body"],
+                "properties": {
+                  "body": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "500": {
+            "description": "전송 실패",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "message": "메시지 전송에 실패했습니다",
+                  "code": "SEND_FAILED"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/friends": {
+      "get": {
+        "operationId": "listFriends",
+        "summary": "친구 목록",
+        "responses": {
+          "200": {
+            "description": "친구 목록",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FriendList"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "friend-1",
+                      "name": "김서연",
+                      "email": "seoyeon@lumen.app",
+                      "avatarUrl": null,
+                      "online": true
+                    },
+                    {
+                      "id": "friend-2",
+                      "name": "박준호",
+                      "email": "junho@lumen.app",
+                      "avatarUrl": null,
+                      "online": false
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "addFriend",
+        "summary": "친구 추가",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" }
+                }
+              },
+              "example": {
+                "email": "newfriend@lumen.app"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "추가된 친구",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Friend"
+                },
+                "example": {
+                  "id": "friend-new",
+                  "name": "새 친구",
+                  "email": "newfriend@lumen.app",
+                  "avatarUrl": null,
+                  "online": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings": {
+      "get": {
+        "operationId": "getSettings",
+        "summary": "사용자 설정",
+        "responses": {
+          "200": {
+            "description": "설정",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSettings"
+                },
+                "example": {
+                  "theme": "system",
+                  "locale": "ko",
+                  "notificationsEnabled": true,
+                  "soundEnabled": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateSettings",
+        "summary": "설정 저장",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserSettings"
+              },
+              "example": {
+                "theme": "dark",
+                "locale": "ko",
+                "notificationsEnabled": false,
+                "soundEnabled": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "저장된 설정",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSettings"
+                },
+                "example": {
+                  "theme": "dark",
+                  "locale": "ko",
+                  "notificationsEnabled": false,
+                  "soundEnabled": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Profile": {
+        "type": "object",
+        "required": ["id", "name", "email", "bio", "avatarUrl"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "bio": { "type": "string" },
+          "avatarUrl": { "type": "string", "nullable": true }
+        }
+      },
+      "AuthSession": {
+        "type": "object",
+        "required": ["token", "profile"],
+        "properties": {
+          "token": { "type": "string" },
+          "profile": { "$ref": "#/components/schemas/Profile" }
+        }
+      },
+      "Conversation": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "preview",
+          "updatedAt",
+          "unreadCount",
+          "isGroup",
+          "avatarUrl"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "preview": { "type": "string" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "unreadCount": { "type": "integer", "minimum": 0 },
+          "isGroup": { "type": "boolean" },
+          "avatarUrl": { "type": "string", "nullable": true }
+        }
+      },
+      "ConversationList": {
+        "type": "object",
+        "required": ["items"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Conversation" }
+          }
+        }
+      },
+      "Message": {
+        "type": "object",
+        "required": ["id", "conversationId", "senderId", "body", "createdAt"],
+        "properties": {
+          "id": { "type": "string" },
+          "conversationId": { "type": "string" },
+          "senderId": { "type": "string" },
+          "body": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "failed": { "type": "boolean" }
+        }
+      },
+      "MessageList": {
+        "type": "object",
+        "required": ["items"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Message" }
+          }
+        }
+      },
+      "Friend": {
+        "type": "object",
+        "required": ["id", "name", "email", "avatarUrl", "online"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "avatarUrl": { "type": "string", "nullable": true },
+          "online": { "type": "boolean" }
+        }
+      },
+      "FriendList": {
+        "type": "object",
+        "required": ["items"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Friend" }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["message"],
+        "properties": {
+          "message": { "type": "string" },
+          "code": { "type": "string" }
+        }
+      },
+      "UserSettings": {
+        "type": "object",
+        "required": [
+          "theme",
+          "locale",
+          "notificationsEnabled",
+          "soundEnabled"
+        ],
+        "properties": {
+          "theme": {
+            "type": "string",
+            "enum": ["light", "dark", "system"]
+          },
+          "locale": {
+            "type": "string",
+            "enum": ["ko", "en", "ja"]
+          },
+          "notificationsEnabled": { "type": "boolean" },
+          "soundEnabled": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

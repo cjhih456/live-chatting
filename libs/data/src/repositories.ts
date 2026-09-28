@@ -132,4 +132,18 @@ export const friendRepository = {
     const data = await api.post('friends', { json: body }).json();
     return friendSchema.parse(data);
   },
+  async accept(friendId: string) {
+    if (useSupabaseDataSource()) {
+      await supabaseFriendRepository.accept(friendId);
+      return;
+    }
+    await api.post(`friends/${friendId}/accept`);
+  },
+  async remove(friendId: string) {
+    if (useSupabaseDataSource()) {
+      await supabaseFriendRepository.remove(friendId);
+      return;
+    }
+    await api.delete(`friends/${friendId}`);
+  },
 };

@@ -224,11 +224,6 @@ export const supabaseConversationRepository = {
       throw error;
     }
 
-    await client
-      .from('conversations')
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', conversationId);
-
     return mapMessage(data as MessageRow);
   },
 };
@@ -297,47 +292,51 @@ export const supabaseSettingsRepository = {
   },
 };
 
+function assertUuid(value: string) {
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      value,
+    )
+  ) {
+    throw new Error('잘못된 사용자 id입니다');
+  }
+}
+
+type FriendCardRow = {
+  id: string;
+  name: string;
+  email: string | null;
+  avatar_url: string | null;
+  status: 'accepted' | 'pending_in' | 'pending_out';
+};
+
+type LookupRow = {
+  id: string;
+  name: string;
+};
+
+function mapFriendCard(row: FriendCardRow) {
+  return friendSchema.parse({
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    avatarUrl: row.avatar_url,
+    online: false,
+    status: row.status,
+  });
+}
+
 export const supabaseFriendRepository = {
   async list() {
     const client = requireClient();
-    const userId = await requireUserId();
+    await requireUserId();
 
-    const { data: friendships, error } = await client
-      .from('friendships')
-      .select('user_id, friend_id')
-      .or(`user_id.eq.${userId},friend_id.eq.${userId}`);
-
+    const { data, error } = await client.rpc('list_friend_cards');
     if (error) {
       throw error;
     }
 
-    const friendIds = (friendships ?? []).map((row) =>
-      row.user_id === userId ? row.friend_id : row.user_id,
-    );
-
-    if (friendIds.length === 0) {
-      return friendListSchema.parse({ items: [] });
-    }
-
-    const { data: profiles, error: profileError } = await client
-      .from('profiles')
-      .select('id, name, email, bio, avatar_url')
-      .in('id', friendIds);
-
-    if (profileError) {
-      throw profileError;
-    }
-
-    const items = (profiles as ProfileRow[]).map((row) =>
-      friendSchema.parse({
-        id: row.id,
-        name: row.name,
-        email: row.email,
-        avatarUrl: row.avatar_url,
-        online: false,
-      }),
-    );
-
+    const items = ((data as FriendCardRow[] | null) ?? []).map(mapFriendCard);
     return friendListSchema.parse({ items });
   },
 
@@ -349,7 +348,7 @@ export const supabaseFriendRepository = {
       'lookup_profile_by_email',
       { p_email: input.email },
     );
-    const friendProfile = (friendRows as ProfileRow[] | null)?.[0] ?? null;
+    const friendProfile = (friendRows as LookupRow[] | null)?.[0] ?? null;
 
     if (lookupError) {
       throw lookupError;
@@ -373,9 +372,44 @@ export const supabaseFriendRepository = {
     return friendSchema.parse({
       id: friendProfile.id,
       name: friendProfile.name,
-      email: friendProfile.email,
-      avatarUrl: friendProfile.avatar_url,
+      email: null,
+      avatarUrl: null,
       online: false,
+      status: 'pending_out',
     });
+  },
+
+  async accept(friendId: string) {
+    const client = requireClient();
+    const userId = await requireUserId();
+    assertUuid(userId);
+    assertUuid(friendId);
+    const { error } = await client
+      .from('friendships')
+      .update({ status: 'accepted' })
+      .eq('user_id', friendId)
+      .eq('friend_id', userId)
+      .eq('status', 'pending');
+
+    if (error) {
+      throw error;
+    }
+  },
+
+  async remove(friendId: string) {
+    const client = requireClient();
+    const userId = await requireUserId();
+    assertUuid(userId);
+    assertUuid(friendId);
+    const { error } = await client
+      .from('friendships')
+      .delete()
+      .or(
+        `and(user_id.eq.${userId},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${userId})`,
+      );
+
+    if (error) {
+      throw error;
+    }
   },
 };

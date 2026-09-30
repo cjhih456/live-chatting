@@ -15,6 +15,8 @@ export { subscribeMessages, type MessageChangePayload } from './supabase/realtim
 export {
   queryKeys,
   useAddFriendMutation,
+  useAcceptFriendMutation,
+  useRemoveFriendMutation,
   useConversationsQuery,
   useFriendsQuery,
   useMessagesQuery,

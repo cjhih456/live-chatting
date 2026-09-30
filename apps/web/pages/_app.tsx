@@ -1,4 +1,5 @@
 import type { AppProps } from 'next/app';
+import type { SetupWorker } from 'msw/browser';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -17,21 +18,22 @@ function makeClient() {
 
 export default function App({ Component, pageProps }: AppProps) {
   const [client] = useState(makeClient);
+  const supabaseClient = useState(() => getSupabaseClient());
 
   useEffect(() => {
-    getSupabaseClient();
-  }, []);
-
-  useEffect(() => {
+    if (supabaseClient !== null) {
+      return;
+    }
     if (process.env.NODE_ENV !== 'development') {
       return;
     }
 
     let cancelled = false;
-
+    
     if (sessionStorage.getItem('lumen-msw-browser') === 'off') {
       return;
     }
+    let worker: SetupWorker | null = null;
 
     void (async () => {
       try {
@@ -46,8 +48,21 @@ export default function App({ Component, pageProps }: AppProps) {
 
     return () => {
       cancelled = true;
+      if (worker !== null) {
+        void (async () => {
+          try {
+            const { stopBrowserWorker } = await import('@lumen/data/msw/browser');
+            if (!cancelled) {
+              await stopBrowserWorker(worker);
+            }
+          } catch (error) {
+            console.error('MSW worker failed to start', error);
+          }
+        })();
+      }
+
     };
-  }, []);
+  }, [supabaseClient]);
 
   return (
     <QueryClientProvider client={client}>

@@ -16,9 +16,10 @@ export interface Profile {
 export interface Friend {
   id: FriendId;
   name: string;
-  email: string;
+  email: string | null;
   avatarUrl: string | null;
   online: boolean;
+  status?: 'accepted' | 'pending_in' | 'pending_out';
 }
 
 export interface Conversation {

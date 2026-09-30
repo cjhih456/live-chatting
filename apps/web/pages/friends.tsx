@@ -4,7 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { addFriendSchema, copy, type AddFriendInput } from '@lumen/structure';
-import { useAddFriendMutation, useFriendsQuery } from '@lumen/data';
+import { useAddFriendMutation, useAcceptFriendMutation, useFriendsQuery, useRemoveFriendMutation } from '@lumen/data';
 import { Text, View, Avatar, Button, ErrorState, Input, LoadingState } from '@lumen/ui';
 import { Shell } from '../components/shell';
 
@@ -14,6 +14,8 @@ function FriendsContent() {
   const mutation = useAddFriendMutation({
     onSuccess: () => undefined,
   });
+  const acceptFriend = useAcceptFriendMutation();
+  const removeFriend = useRemoveFriendMutation();
   const { control, handleSubmit, reset } = useForm<AddFriendInput>({
     resolver: zodResolver(addFriendSchema),
     defaultValues: { email: '' },
@@ -58,8 +60,29 @@ function FriendsContent() {
               <Text className="font-sans text-base font-semibold text-fg">
                 {item.name}
               </Text>
-              <Text className="font-sans text-sm text-muted">{item.email}</Text>
+              <Text className="font-sans text-sm text-muted">
+                {item.status === 'pending_in'
+                  ? '친구 요청'
+                  : item.status === 'pending_out'
+                    ? '수락 대기'
+                    : item.email}
+              </Text>
             </View>
+            {item.status === 'pending_in' ? (
+              <Button
+                label="수락"
+                loading={acceptFriend.isPending}
+                onPress={() => acceptFriend.mutate(item.id)}
+              />
+            ) : null}
+            {item.status === 'pending_in' || item.status === 'pending_out' ? (
+              <Button
+                label={item.status === 'pending_in' ? '거절' : '취소'}
+                variant="ghost"
+                loading={removeFriend.isPending}
+                onPress={() => removeFriend.mutate(item.id)}
+              />
+            ) : null}
           </View>
         ))}
       </View>

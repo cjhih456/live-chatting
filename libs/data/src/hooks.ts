@@ -158,8 +158,33 @@ export function useAddFriendMutation(
     AddFriendInput
   >,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: friendRepository.add,
     ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.friends });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useAcceptFriendMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (friendId: string) => friendRepository.accept(friendId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.friends });
+    },
+  });
+}
+
+export function useRemoveFriendMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (friendId: string) => friendRepository.remove(friendId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.friends });
+    },
   });
 }

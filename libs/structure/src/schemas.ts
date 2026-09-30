@@ -71,12 +71,21 @@ export const profileSchema = z.object({
   avatarUrl: z.string().nullable(),
 });
 
+export const friendStatusSchema = z.enum([
+  'accepted',
+  'pending_in',
+  'pending_out',
+]);
+
+export type FriendStatus = z.infer<typeof friendStatusSchema>;
+
 export const friendSchema = z.object({
   id: z.string(),
   name: z.string(),
-  email: z.string().email(),
+  email: z.string().email().nullable(),
   avatarUrl: z.string().nullable(),
   online: z.boolean(),
+  status: friendStatusSchema.default('accepted'),
 });
 
 export const conversationSchema = z.object({

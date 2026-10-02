@@ -88,9 +88,11 @@ function mapMessage(row: MessageRow) {
 export const supabaseProfileRepository = {
   async get() {
     const client = requireClient();
+    const userId = await requireUserId();
     const { data, error } = await client
       .from('profiles')
       .select('id, name, email, bio, avatar_url')
+      .eq('id', userId)
       .single();
     if (error) {
       throw error;
